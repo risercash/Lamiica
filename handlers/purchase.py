@@ -13,6 +13,13 @@ from loader import bot, dp
 userData = {}
 admin_message = {}
 
+async def user_name(message):
+    if message.from_user.username == None:
+        usr = f"{message.from_user.full_name} ({message.from_user.id})"
+    else:
+        usr = f"@{message.from_user.username} ({message.from_user.id})"
+    return usr
+
 
 @dp.message_handler(Command('admin'))
 async def admin(message: Message):
@@ -22,34 +29,37 @@ async def admin(message: Message):
 
 @dp.message_handler(Command('start'))
 async def start(message: Message):
-    await message.answer(f"""Приветствую тебя, {message.from_user.first_name} 👋
+    await message.answer(f"""Приветствую тебя, {message.from_user.first_name}! 
 
-Я помогу тебе записаться на бесплатную консультацию «Анализ твоего Инстаграм»❓⁉️❓
-
-Для того, что бы нам лучше узнать тебя 🔎 и чем тебе помочь 
-нажми на кнопку, что бы заполнить анкету 
-⬇️⬇️⬇️⬇️
-
-💡Данная анкета необходима, что бы лучше подготовиться к консультации💡""", reply_markup=btn.next)
+Я помогу тебе записаться на бесплатную консультацию во время которой мы разберём твои вопросы по Инстаграм! """, reply_markup=btn.next)
     
     new_user = tobase.new_user(message.from_user)
     if new_user:
-        if message.from_user.username == None:
-            usr = f"{message.from_user.full_name} ({message.from_user.id})"
-        else:
-            usr = f"@{message.from_user.username} ({message.from_user.id})"
-
+        usr = await user_name(message)
         await bot.send_message(ADM, usr)
 
 
 @dp.callback_query_handler(text_contains="next")
-async def nextme(call: CallbackQuery):
+async def nextme(call: CallbackQuery, state: FSMContext):
     await call.answer(cache_time=20)
-    await call.message.answer("""Если ты хочешь получить реальный результат, то отвечай на все вопросы честно и развёрнуто! 
+    await call.message.answer('Пришлите ссылку на свой Инстаграм')
+    await state.set_state("insta")
 
-☝️Время и дату консультации я напишу тебе в Директ! 
 
-☝️Если вдруг ты не получишь от меня сообщение, то напиши мне в Директ в моем 👉[Инстаграм!](https://instagram.com/alena.chugavina)""", reply_markup=btn.callBack, parse_mode='Markdown')
+@dp.message_handler(state="insta")
+async def insta(message: Message, state: FSMContext):
+    await message.answer("Опиши запрос на консультацию ")
+    await state.set_state("request")
+    await tobase.append_insta_link(message.from_user.id, message.text)
+    await bot.send_message(ADM, f'{await user_name(message)} {message.text}')
+
+
+@dp.message_handler(state="request")
+async def insta(message: Message, state: FSMContext):
+    await message.answer("Опиши запрос на консультацию ")
+    await state.set_state("request")
+    await tobase.append_insta_link(message.from_user.id, message.text)
+    await bot.send_message(ADM, f'{await user_name(message)} {message.text}')
 
 
 @dp.message_handler(Command("send"))

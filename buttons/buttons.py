@@ -9,7 +9,7 @@ callBack = types.InlineKeyboardMarkup()
 callBack.add(types.InlineKeyboardButton(text='📑 «АНКЕТА» 📑', url="https://forms.gle/goFYS5sEoQzWcso46"))
 
 next = types.InlineKeyboardMarkup()
-next.add(types.InlineKeyboardButton(text='Дальше', callback_data="next"))
+next.add(types.InlineKeyboardButton(text='Понятно!', callback_data="next"))
 
 # Основоное меню админки
 menu = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)

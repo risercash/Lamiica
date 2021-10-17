@@ -3,7 +3,7 @@ version: '3.1'
 services:
 
   goose:
-    container_name: lambot
+    container_name: lambot2
     build: .
     volumes:
       - .:/src

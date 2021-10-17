@@ -1,5 +1,6 @@
 import asyncio
 import re
+from aiohttp.client import request
 import pymongo
 
 from datetime import datetime
@@ -9,7 +10,7 @@ from config import URL
 
 col = pymongo.MongoClient(URL)
 client = pymongo.MongoClient(URL, ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-Users = client['LAM']['Users']
+Users = client['LAM1']['Users']
 
 
 def new_user(usr):
@@ -28,3 +29,13 @@ def new_user(usr):
 
 
 async def show_users(): return list(Users.find({}, {'_id': 0}))
+
+
+async def append_insta_link(user_id, link):
+    Users.update_one({"user_id": user_id},
+                     {'$set': {"insta_link": link}})
+
+
+async def append_request(user_id, req):
+    Users.update_one({"user_id": user_id},
+                     {'$set': {"request": req}})
